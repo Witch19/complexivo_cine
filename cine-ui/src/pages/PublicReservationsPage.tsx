@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Container, Paper, Typography, Button, Stack, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { type Pedido, listPedidosPublicApi } from "../api/Pedidos.api";
+import { type Reservation, listReservationsPublicApi } from "../api/Reservations.api";
 
-export default function PublicPedidosPage() {
-  const [items, setItems] = useState<Pedido[]>([]);
+export default function PublicReservationsPage() {
+  const [items, setItems] = useState<Reservation[]>([]);
   const [error, setError] = useState("");
 
   const load = async () => {
     try {
       setError("");
-      const data = await listPedidosPublicApi();
+      const data = await listReservationsPublicApi(); //AQUI SE CAMBIA LOS NOMBRES
       setItems(data.results); // DRF paginado
     } catch {
       setError("No se pudo cargar la lista pública. ¿Backend encendido?");
@@ -43,11 +43,10 @@ export default function PublicPedidosPage() {
             {items.map((v) => (
               <TableRow key={v.id}>
                 <TableCell>{v.id}</TableCell>
-                <TableCell>{v.mesa_nombre ?? v.mesa}</TableCell>
-                <TableCell>{v.items_summary}</TableCell>
-                <TableCell>{v.total}</TableCell>
+                <TableCell>{v.show_title ?? v.show}</TableCell>
+                <TableCell>{v.customer_name}</TableCell>
+                <TableCell>{v.seats}</TableCell>
                 <TableCell>{v.status}</TableCell>
-                <TableCell>{v.color || "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

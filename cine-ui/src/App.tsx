@@ -3,12 +3,12 @@ import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material";
 
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
-import PublicPedidosPage from "./pages/PublicPedidosPage";
+import PublicPedidosPage from "./pages/PublicReservationsPage";
 import LoginPage from "./pages/LoginPage";
 
 import AdminHomePage from "./pages/AdminHomePage";
-import AdminMesasPage from "./pages/AdminMesasPage";
-import AdminPedidosPage from "./pages/AdminPedidosPage";
+import AdminMesasPage from "./pages/AdminShowsPage";
+import AdminPedidosPage from "./pages/AdminReservationsPage";
 
 import RequireAuth from "./components/RequireAuth";
 

@@ -1,7 +1,7 @@
-export type OrderEvent = {
+export type ReservationEvent = {
     id: string;
     event_type: number;       // Postgres
-    service_type_id: string;   // Mongo
+    reservation_id: string;   // Mongo
     date?: string;             // backend asigna fecha al crear (NO se envía desde app)
     note?: string;
     source?: string;

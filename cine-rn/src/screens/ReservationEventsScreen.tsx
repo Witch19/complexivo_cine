@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, FlatList, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-import { listPedidosApi } from "../api/pedidos.api";
-import { listMenuTypesApi } from "../api/MenuTypes.api";
-import { listOrderEventsApi, createOrderEventApi, deleteOrderEventApi } from "../api/OrderEvents.api";
+import { listReservationApi } from "../api/reservation.api";
+import { listMenuTypesApi } from "../api/CatalogTypes.api";
+import { listOrderEventsApi, createOrderEventApi, deleteOrderEventApi } from "../api/ReservationEvents.api";
 
-import type { Pedido } from "../types/pedido";
-import type { MenuType } from "../types/MenuType";
-import type { OrderEvent } from "../types/OrderEvent";
+import type { Reservation } from "../types/reservation";
+import type { CatalogType } from "../types/CatalogType";
+import type { ReservationEvent } from "../types/ReservationEvent";
 import { toArray } from "../types/drf";
 
 
-function MenuTypeLabel(st: MenuType): string {
-  return st.name;
+function CatalogTypeLabel(st: CatalogType): string {
+  return st.movie_title;
 }
 
 function parseOptionalNumber(input: string): { value?: number; error?: string } {
@@ -24,10 +24,10 @@ function parseOptionalNumber(input: string): { value?: number; error?: string } 
   return { value: parsed };
 }
 
-export default function OrderEventsScreen() {
-  const [services, setServices] = useState<OrderEvent[]>([]);
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [MenuTypes, setMenuTypes] = useState<MenuType[]>([]);
+export default function ReservationEventsScreen() {
+  const [services, setServices] = useState<ReservationEvent[]>([]);
+  const [pedidos, setPedidos] = useState<Reservation[]>([]);
+  const [MenuTypes, setMenuTypes] = useState<CatalogType[]>([]);
 
   const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null);
   const [selectedMenuTypeId, setSelectedMenuTypeId] = useState<string>("");

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, FlatList, StyleSheet } from "react-native";
-
-import { listMenuTypesApi, createMenuTypeApi, deleteMenuTypeApi } from "../api/MenuTypes.api";
-import type { MenuType } from "../types/MenuType";
+import { listCatalogTypesApi, createCatalogTypeApi, deleteCatalogTypeApi } from "../api/CatalogTypes.api";  
+import type { CatalogType } from "../types/CatalogType";
 import { toArray } from "../types/drf";
 
 function normalizeText(input: string): string {
@@ -10,7 +9,7 @@ function normalizeText(input: string): string {
 }
 
 export default function MenuTypesScreen() {
-  const [items, setItems] = useState<MenuType[]>([]);
+  const [items, setItems] = useState<CatalogType[]>([]);
   const [name, setName] = useState("");
   const [category, setcategory] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -18,10 +17,10 @@ export default function MenuTypesScreen() {
   const load = async (): Promise<void> => {
     try {
       setErrorMessage("");
-      const data = await listMenuTypesApi();
+      const data = await listCatalogTypesApi();
       setItems(toArray(data));
     } catch {
-      setErrorMessage("No se pudo cargar los tipos de Menu. ¿Login? ¿Token?");
+      setErrorMessage("No se pudo cargar los tipos de Catalogo. ¿Login? ¿Token?");
     }
   };
 
@@ -34,8 +33,8 @@ export default function MenuTypesScreen() {
       const cleanName = normalizeText(name);
       if (!cleanName) return setErrorMessage("Name es requerido");
 
-      const created = await createMenuTypeApi({
-        name: cleanName,
+      const created = await createCatalogTypeApi({
+        movie_title: cleanName,
         category: normalizeText(category) || undefined,
       });
 
@@ -50,7 +49,7 @@ export default function MenuTypesScreen() {
   const removeItem = async (id: string): Promise<void> => {
     try {
       setErrorMessage("");
-      await deleteMenuTypeApi(id);
+      await deleteCatalogTypeApi(id);
       setItems((prev) => prev.filter((it) => it.id !== id));
     } catch {
       setErrorMessage("No se pudo eliminar service type.");
@@ -59,7 +58,7 @@ export default function MenuTypesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tipos de Menu</Text>
+      <Text style={styles.title}>Tipos de Catalogo</Text>
       {!!errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
 
       <Text style={styles.label}>Nombre</Text>

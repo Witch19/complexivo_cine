@@ -6,21 +6,21 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import { type Mesa, listMesasApi, createMesaApi, updateMesaApi, deleteMesaApi } from "../api/Mesas.api";
+import { type Show, listShowsApi, createShowApi, updateShowApi, deleteShowApi } from "../api/Shows.api";
 
-export default function AdminMesasPage() {
-  const [items, setItems] = useState<Mesa[]>([]);
-  const [name, setname] = useState("");
+export default function AdminShowsPage() {
+  const [items, setItems] = useState<Show[]>([]);
+  const [movieTitle, setMovieTitle] = useState("");
   const [editId, setEditId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   const load = async () => {
     try {
       setError("");
-      const data = await listMesasApi();
+      const data = await listShowsApi();
       setItems(data.results); // DRF paginado
-    } catch {
-      setError("No se pudo cargar Mesas. ¿Login? ¿Token admin?");
+    } catch (error) {
+      setError("No se pudo cargar Shows. ¿Login? ¿Token admin?");
     }
   };
 
@@ -29,45 +29,45 @@ export default function AdminMesasPage() {
   const save = async () => {
     try {
       setError("");
-      if (!name.trim()) return setError("name requerido");
+      if (!movieTitle.trim()) return setError("movie_title requerido");
 
-      if (editId) await updateMesaApi(editId, name.trim());
-      else await createMesaApi(name.trim());
+      if (editId) await updateShowApi(editId, movieTitle.trim());
+      else await createShowApi(movieTitle.trim());
 
-      setname("");
+      setMovieTitle("");
       setEditId(null);
       await load();
-    } catch {
-      setError("No se pudo guardar mesa. ¿Token admin?");
+    } catch (error) {
+      setError("No se pudo guardar show. ¿Token admin?");
     }
   };
 
-  const startEdit = (m: Mesa) => {
+  const startEdit = (m: Show) => {
     setEditId(m.id);
-    setname(m.name);
+    setMovieTitle(m.movie_title);
   };
 
   const remove = async (id: number) => {
     try {
       setError("");
-      await deleteMesaApi(id);
+      await deleteShowApi(id);
       await load();
-    } catch {
-      setError("No se pudo eliminar mesa. ¿Pedidos asociados? ¿Token admin?");
+    } catch (error) {
+      setError("No se pudo eliminar show. ¿Pedidos asociados? ¿Token admin?");
     }
   };
 
   return (
     <Container sx={{ mt: 3 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Admin Mesas (Privado)</Typography>
+        <Typography variant="h5" sx={{ mb: 2 }}>Admin Shows (Privado)</Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>
-          <TextField label="name mesa" value={name} onChange={(e) => setname(e.target.value)} fullWidth />
+          <TextField label="movie title" value={movieTitle} onChange={(e) => setMovieTitle(e.target.value)} fullWidth />
           <Button variant="contained" onClick={save}>{editId ? "Actualizar" : "Crear"}</Button>
-          <Button variant="outlined" onClick={() => { setname(""); setEditId(null); }}>Limpiar</Button>
+          <Button variant="outlined" onClick={() => { setMovieTitle(""); setEditId(null); }}>Limpiar</Button>
           <Button variant="outlined" onClick={load}>Refrescar</Button>
         </Stack>
 
@@ -75,7 +75,7 @@ export default function AdminMesasPage() {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>name</TableCell>
+              <TableCell>movie title</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -83,7 +83,7 @@ export default function AdminMesasPage() {
             {items.map((m) => (
               <TableRow key={m.id}>
                 <TableCell>{m.id}</TableCell>
-                <TableCell>{m.name}</TableCell>
+                <TableCell>{m.movie_title}</TableCell>
                 <TableCell align="right">
                   <IconButton onClick={() => startEdit(m)}><EditIcon /></IconButton>
                   <IconButton onClick={() => remove(m.id)}><DeleteIcon /></IconButton>

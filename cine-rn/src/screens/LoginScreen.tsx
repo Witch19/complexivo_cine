@@ -13,8 +13,8 @@ type GlobalAuthStore = { accessToken?: string; refreshToken?: string };
 export default function LoginScreen() {
   const navigation = useNavigation<Nav>();
 
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin");
+  const [username, setUsername] = useState("cine_user");
+  const [password, setPassword] = useState("admin123");
   const [errorMessage, setErrorMessage] = useState("");
 
   const doLogin = async (): Promise<void> => {
