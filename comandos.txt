@@ -82,7 +82,7 @@ BEFORE INSERT ON reservations
 EXECUTE FUNCTION fn_validar();
  
 
- 
+
 MONGODB
 Mongosh
 Show admin
@@ -170,7 +170,6 @@ usuario
 admin
 contraseña
 admin
-
 
 
 
