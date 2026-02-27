@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
 
-    "restaurante",
+    "cine",  # aqui va el nombre de la app
 ]
 
 MIDDLEWARE = [

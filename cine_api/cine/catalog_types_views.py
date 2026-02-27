@@ -5,9 +5,9 @@ from rest_framework import status
 from bson import ObjectId
 from bson.errors import InvalidId
 from .mongo import db
-from .mongo_serializers import OrderEventSerializer
+from .mongo_serializers import MovieCatalogTypeSerializer #ShowTypeSerializer, ReservationEventSerializer
 
-col = db["order_events"]
+col = db["catalog_types"] #menus_types
 
 def fix_id(doc):
     doc["id"] = str(doc["_id"])
@@ -22,13 +22,14 @@ def oid_or_none(id_str: str):
 
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
-def order_events_list_create(request):
+def catalog_types_list_create(request):
     if request.method == "GET":
+        # filtros simples: ?name=...&is_active=true (strings)
         q = dict(request.query_params)
         docs = [fix_id(d) for d in col.find(q)]
         return Response(docs)
 
-    serializer = OrderEventSerializer(data=request.data)
+    serializer = MovieCatalogTypeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     res = col.insert_one(serializer.validated_data)
@@ -37,7 +38,7 @@ def order_events_list_create(request):
 
 @api_view(["GET", "PUT", "PATCH", "DELETE"])
 @permission_classes([IsAuthenticated])
-def order_events_detail(request, id: str):
+def catalog_types_detail(request, id: str):
     _id = oid_or_none(id)
     if _id is None:
         return Response({"detail": "id inválido"}, status=status.HTTP_400_BAD_REQUEST)
@@ -49,7 +50,7 @@ def order_events_detail(request, id: str):
         return Response(fix_id(doc))
 
     if request.method in ["PUT", "PATCH"]:
-        serializer = OrderEventSerializer(data=request.data, partial=(request.method == "PATCH"))
+        serializer = MovieCatalogTypeSerializer(data=request.data, partial=(request.method == "PATCH")) 
         serializer.is_valid(raise_exception=True)
 
         col.update_one({"_id": _id}, {"$set": serializer.validated_data})
