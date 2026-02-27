@@ -190,3 +190,7 @@ CREATE OR REPLACE TRIGGER trg_validar_quantity
 BEFORE INSERT ON restaurante_mesa
 FOR EACH ROW
 EXECUTE FUNCTION fn_validar_quantity();
+
+ollama run llama3.1
+ollama run codellama 
+ollama run deepseek-coder
