@@ -1,0 +1,317 @@
+{
+  "info": {
+    "_postman_id": "b2d2c3f0-aaaa-bbbb-cccc-123456789000",
+    "name": "Pedidos API (Django + Postgres + JWT + Mongo)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "MenuTypeId", "value": "" },
+    { "key": "PedidoserviceId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Public) - POST /api/auth/register/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user1\",\n  \"email\": \"user1@mail.com\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+            "name": "Login (JWT) - POST /api/auth/login/ (save tokens)",
+            "event": [
+                {
+                "listen": "test",
+                "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                    "let jsonData = {};",
+                    "try { jsonData = pm.response.json(); } catch (e) {}",
+                    "",
+                    "if (jsonData.access) {",
+                    "  pm.collectionVariables.set('accessToken', jsonData.access);",
+                    "  pm.environment.set('accessToken', jsonData.access);",
+                    "}",
+                    "",
+                    "if (jsonData.refresh) {",
+                    "  pm.collectionVariables.set('refreshToken', jsonData.refresh);",
+                    "  pm.environment.set('refreshToken', jsonData.refresh);",
+                    "}",
+                    "",
+                    "pm.test('Token access recibido', function () {",
+                    "  pm.expect(jsonData.access).to.be.a('string');",
+                    "});"
+                    ]
+                }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/auth/login/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login", ""] },
+                "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+                }
+            }
+        },
+        {
+          "name": "Refresh (JWT) - POST /api/auth/refresh/ (save access)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.access) pm.collectionVariables.set('accessToken', jsonData.access);",
+                  "pm.test('Token access refrescado', function () { pm.expect(jsonData.access).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh/", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Postgres - Mesas",
+      "item": [
+        {
+          "name": "List Mesas (Admin token) - GET /api/Mesas/",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/Mesas/", "host": ["{{baseUrl}}"], "path": ["api", "Mesas", ""] }
+          }
+        },
+        {
+          "name": "Create mesa (Admin) - POST /api/Mesas/",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/Mesas/", "host": ["{{baseUrl}}"], "path": ["api", "Mesas", ""] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Toyota\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Postgres - Pedidos",
+      "item": [
+        {
+          "name": "List Pedidos (Public) - GET /api/Pedidos/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/Pedidos/", "host": ["{{baseUrl}}"], "path": ["api", "Pedidos", ""] }
+          }
+        },
+        {
+          "name": "Create Pedido (Admin) - POST /api/Pedidos/",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/Pedidos/", "host": ["{{baseUrl}}"], "path": ["api", "Pedidos", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mesa\": 1,\n  \"items_summary\": \"Corolla\",\n  \"total\": 2020,\n  \"status\": \"ABC-1234\",\n  \"color\": \"Rojo\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo - menus_types",
+      "item": [
+        {
+          "name": "List service types (Auth) - GET /api/menu-types/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/menu-types/", "host": ["{{baseUrl}}"], "path": ["api", "menu-types", ""] }
+          }
+        },
+        {
+          "name": "Create service type (Auth) - POST /api/menu-types/ (save MenuTypeId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.id) pm.collectionVariables.set('MenuTypeId', jsonData.id);",
+                  "pm.test('Se creó service type', function () { pm.expect(jsonData.id).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/menu-types/", "host": ["{{baseUrl}}"], "path": ["api", "menu-types", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cambio de aceite\",\n  \"category\": \"Aceite + filtro\",\n  \"base_price\": 35,\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Get service type by id (Auth) - GET /api/menu-types/:id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu-types/{{MenuTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu-types", "{{MenuTypeId}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Patch service type (Auth) - PATCH /api/menu-types/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu-types/{{MenuTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu-types", "{{MenuTypeId}}", ""]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": false\n}" }
+          }
+        },
+        {
+          "name": "Delete service type (Auth) - DELETE /api/menu-types/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/menu-types/{{MenuTypeId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menu-types", "{{MenuTypeId}}", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mongo - order_events",
+      "item": [
+        {
+          "name": "List order eventss (Auth) - GET /api/order-events/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/order-events/", "host": ["{{baseUrl}}"], "path": ["api", "order-events", ""] }
+          }
+        },
+        {
+          "name": "Create order events (Auth) - POST /api/order-events/ (save PedidoserviceId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData = {};",
+                  "try { jsonData = pm.response.json(); } catch (e) {}",
+                  "if (jsonData.id) pm.collectionVariables.set('PedidoserviceId', jsonData.id);",
+                  "pm.test('Se creó order events', function () { pm.expect(jsonData.id).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/order-events/", "host": ["{{baseUrl}}"], "path": ["api", "order-events", ""] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 1,\n  \"event_type\": \"{{MenuTypeId}}\",\n  \"date\": \"2026-02-04\",\n  \"kilometers\": 85000,\n  \"source\": 40,\n  \"note\": \"Se cambió filtro\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get order events by id (Auth) - GET /api/order-events/:id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-events/{{PedidoserviceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "order-events", "{{PedidoserviceId}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Patch order events (Auth) - PATCH /api/order-events/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-events/{{PedidoserviceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "order-events", "{{PedidoserviceId}}", ""]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"source\": 45,\n  \"note\": \"Actualizado\"\n}" }
+          }
+        },
+        {
+          "name": "Delete order events (Auth) - DELETE /api/order-events/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-events/{{PedidoserviceId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "order-events", "{{PedidoserviceId}}", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

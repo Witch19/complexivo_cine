@@ -1,0 +1,58 @@
+CREATE USER backend_user WITH PASSWORD 'admin123';
+CREATE DATABASE backend_db OWNER backend_user;
+
+\c backend_db
+
+ALTER SCHEMA public OWNER TO backend_user;
+GRANT ALL ON SCHEMA public TO backend_user;
+GRANT CREATE ON SCHEMA public TO backend_user;
+
+ALTER DEFAULT PRIVILEGES FOR USER backend_user IN SCHEMA public
+GRANT ALL ON TABLES TO backend_user;
+
+ALTER DEFAULT PRIVILEGES FOR USER backend_user IN SCHEMA public
+GRANT ALL ON SEQUENCES TO backend_user;
+
+ALTER DEFAULT PRIVILEGES FOR USER backend_user IN SCHEMA public
+GRANT ALL ON FUNCTIONS TO backend_user;
+
+
+
+DEBUG=1
+SECRET_KEY=dev-secret-key
+DB_NAME=backend_db
+DB_USER=backend_user
+DB_PASSWORD=admin123
+DB_HOST=127.0.0.1
+DB_PORT=5432
+
+# Mongo sin Docker: servicio local
+MONGO_URI=mongodb://127.0.0.1:27017
+MONGO_DB=backend_db
+
+CORS_ORIGIN=http://localhost:5173
+usuario
+admin
+contraseña
+admin
+
+
+
+
+/* --- Creación de Función --- */
+CREATE OR REPLACE FUNCTION fn_validar_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.quantity IS NULL OR NEW.quantity <= 0 THEN
+        RAISE EXCEPTION 'No se permite insertar valores negativos';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/* --- Creación de Trigger --- */
+CREATE OR REPLACE TRIGGER trg_validar_quantity
+BEFORE INSERT ON restaurante_mesa
+FOR EACH ROW
+EXECUTE FUNCTION fn_validar_quantity();
