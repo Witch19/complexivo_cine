@@ -1,8 +1,8 @@
 export type ReservationEvent = {
-    id: string;
-    event_type: number;       // Postgres
-    reservation_id: string;   // Mongo
-    date?: string;             // backend asigna fecha al crear (NO se envía desde app)
-    note?: string;
-    source?: string;
-  };
+  _id: string;                // Mongo
+  reservation_id: number;     // id de PostgreSQL
+  event_type: "CREATED" | "CONFIRMED" | "CANCELLED" | "CHECKED_IN";
+  source: "WEB" | "MOBILE" | "SYSTEM";
+  note?: string;
+  created_at: string;
+};

@@ -2,7 +2,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import type { RootStackParamList } from "../../App";
+import type { RootStackParamList } from "../../App"; // ajusta la ruta si no coincide
 
 type Nav = NativeStackNavigationProp<RootStackParamList, "Home">;
 
@@ -11,11 +11,15 @@ type GlobalAuthStore = { accessToken?: string; refreshToken?: string };
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
 
-  const logout = (): void => {
-    const store = global as unknown as GlobalAuthStore;
+  const logout = () => {
+    const store = globalThis as unknown as GlobalAuthStore;
     store.accessToken = undefined;
     store.refreshToken = undefined;
-    navigation.replace("Login");
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }],
+    });
   };
 
   return (
@@ -24,15 +28,15 @@ export default function HomeScreen() {
       <Text style={styles.sub}>CRUD Mongo mínimo + selects</Text>
 
       <Pressable onPress={() => navigation.navigate("CatalogTypes")} style={styles.btn}>
-        <Text style={styles.btnText}>Menu Types (list/create/delete)</Text>
+        <Text style={styles.btnText}>Catalog Types</Text>
       </Pressable>
 
       <Pressable onPress={() => navigation.navigate("ReservationEvents")} style={styles.btn}>
-        <Text style={styles.btnText}>Order events (2 selects + create/delete)</Text>
+        <Text style={styles.btnText}>Reservation events</Text>
       </Pressable>
 
       <Pressable onPress={logout} style={[styles.btn, styles.btnDanger]}>
-        <Text style={[styles.btnText, styles.btnDangerText]}>Cerrar Sesion (logout)</Text>
+        <Text style={[styles.btnText, styles.btnDangerText]}>Cerrar Sesión</Text>
       </Pressable>
     </View>
   );

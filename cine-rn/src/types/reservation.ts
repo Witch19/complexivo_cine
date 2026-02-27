@@ -1,12 +1,8 @@
 export type Reservation = {
-  show: number;
+  id: number;
+  show: number;          // o show_id según serializer
   customer_name: string;
   seats: number;
   status: string;
-}
- /*   id: number;
-    items_summary: string;
-    modelo?: string;
-    mesa?: number;
-    color?: string;
-  };*/
+  created_at: string;
+};

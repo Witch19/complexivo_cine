@@ -3,9 +3,8 @@ import { View, Text, TextInput, Pressable, FlatList, StyleSheet } from "react-na
 import { Picker } from "@react-native-picker/picker";
 
 import { listReservationApi } from "../api/reservation.api";
-import { listMenuTypesApi } from "../api/CatalogTypes.api";
-import { listOrderEventsApi, createOrderEventApi, deleteOrderEventApi } from "../api/ReservationEvents.api";
-
+import { listReservationEventsApi, createReservationEventApi, deleteReservationEventApi } from "../api/ReservationEvents.api";
+import { listCatalogTypesApi } from "../api/CatalogTypes.api";
 import type { Reservation } from "../types/reservation";
 import type { CatalogType } from "../types/CatalogType";
 import type { ReservationEvent } from "../types/ReservationEvent";
@@ -26,48 +25,48 @@ function parseOptionalNumber(input: string): { value?: number; error?: string } 
 
 export default function ReservationEventsScreen() {
   const [services, setServices] = useState<ReservationEvent[]>([]);
-  const [pedidos, setPedidos] = useState<Reservation[]>([]);
-  const [MenuTypes, setMenuTypes] = useState<CatalogType[]>([]);
+  const [reservation, setReservation] = useState<Reservation[]>([]);
+  const [CatalogTypes, setCatalogTypes] = useState<CatalogType[]>([]);
 
-  const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null);
+  const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
   const [selectedMenuTypeId, setSelectedMenuTypeId] = useState<string>("");
 
   const [note, setNote] = useState("");
   const [sourceInput, setCostInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const vehiculoById = useMemo(() => {
-    const map = new Map<number, Pedido>();
-    pedidos.forEach((v) => map.set(v.id, v));
+  const reservationById = useMemo(() => {
+    const map = new Map<number, Reservation>();
+    reservation.forEach((v) => map.set(v.id, v));
     return map;
-  }, [pedidos]);
+  }, [reservation]);
 
-  const MenuTypeById = useMemo(() => {
-    const map = new Map<string, MenuType>();
-    MenuTypes.forEach((s) => map.set(s.id, s));
+  const CatalogTypeById = useMemo(() => {
+    const map = new Map<string, CatalogType>();
+    CatalogTypes.forEach((s) => map.set(s.id, s));
     return map;
-  }, [MenuTypes]);
+  }, [CatalogTypes]);
 
   const loadAll = async (): Promise<void> => {
     try {
       setErrorMessage("");
 
-      const [servicesData, pedidosData, MenuTypesData] = await Promise.all([
-        listOrderEventsApi(),
-        listPedidosApi(),
-        listMenuTypesApi(),
+      const [servicesData, reservationData, CatalogTypesData] = await Promise.all([
+        listReservationEventsApi(),
+        listReservationApi(),
+        listCatalogTypesApi(),
       ]);
 
       const servicesList = toArray(servicesData);
-      const pedidosList = toArray(pedidosData);
-      const MenuTypesList = toArray(MenuTypesData);
+      const reservationList = toArray(reservationData);
+      const CatalogTypesList = toArray(CatalogTypesData);
 
       setServices(servicesList);
-      setPedidos(pedidosList);
-      setMenuTypes(MenuTypesList);
+      setReservation(reservationList);
+      setCatalogTypes(CatalogTypesList);
 
-      if (selectedPedidoId === null && pedidosList.length) setSelectedPedidoId(pedidosList[0].id);
-      if (!selectedMenuTypeId && MenuTypesList.length) setSelectedMenuTypeId(MenuTypesList[0].id);
+      if (selectedReservationId === null && reservationList.length) setSelectedReservationId(reservationList[0].id);
+      if (!selectedMenuTypeId && CatalogTypesList.length) setSelectedMenuTypeId(CatalogTypesList[0].id);
     } catch {
       setErrorMessage("No se pudo cargar info. ¿Token? ¿baseURL? ¿backend encendido?");
     }
@@ -79,7 +78,7 @@ export default function ReservationEventsScreen() {
     try {
       setErrorMessage("");
 
-      if (selectedPedidoId === null) return setErrorMessage("Seleccione un vehículo");
+      if (selectedReservationId === null) return setErrorMessage("Seleccione una reserva");
       if (!selectedMenuTypeId) return setErrorMessage("Seleccione un tipo de servicio");
 
       const trimmedNote = note.trim() ? note.trim() : undefined;
@@ -87,11 +86,11 @@ export default function ReservationEventsScreen() {
       if (error) return setErrorMessage(error);
 
       // NO enviar fecha, backend la toma actual
-      const created = await createOrderEventApi({
-        event_type: selectedPedidoId,
-        service_type_id: selectedMenuTypeId,
-        note: trimmedNote,
+      const created = await createReservationEventApi({
+        reservation_id: selectedReservationId,
+        event_type: selectedMenuTypeId,
         source: parsedCost,
+        note: trimmedNote,
       });
 
       setServices((prev) => [created, ...prev]);
@@ -105,28 +104,28 @@ export default function ReservationEventsScreen() {
   const removeService = async (id: string): Promise<void> => {
     try {
       setErrorMessage("");
-      await deleteOrderEventApi(id);
+      await deleteReservationEventApi(id);
       setServices((prev) => prev.filter((s) => s.id !== id));
     } catch {
-      setErrorMessage("No se pudo eliminar order events");
+      setErrorMessage("No se pudo eliminar reservation events");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Order Events</Text>
+      <Text style={styles.title}>Reservation Events</Text>
       {!!errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
 
       <Text style={styles.label}>Que desa ordenar</Text>
       <View style={styles.pickerWrap}>
         <Picker
-          selectedValue={selectedPedidoId ?? ""}
-          onValueChange={(value) => setSelectedPedidoId(Number(value))}
+          selectedValue={selectedReservationId ?? ""}
+          onValueChange={(value) => setSelectedReservationId(Number(value))}
           dropdownIconColor="#58a6ff"
           style={styles.picker}
         >
-          {pedidos.map((v) => (
-            <Picker.Item key={v.id} label={v.items_summary} value={v.id} />
+          {reservation.map((v) => (
+            <Picker.Item key={v.id} label={v.customer_name} value={v.id} />
           ))}
         </Picker>
       </View>
@@ -139,8 +138,8 @@ export default function ReservationEventsScreen() {
           dropdownIconColor="#58a6ff"
           style={styles.picker}
         >
-          {MenuTypes.map((st) => (
-            <Picker.Item key={st.id} label={MenuTypeLabel(st)} value={st.id} />
+          {CatalogTypes.map((st) => (
+            <Picker.Item key={st.id} label={CatalogTypeLabel(st)} value={st.id} />
           ))}
         </Picker>
       </View>
@@ -176,16 +175,16 @@ export default function ReservationEventsScreen() {
         data={services}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          const v = vehiculoById.get(item.event_type);
-          const st = MenuTypeById.get(item.service_type_id);
+          const v = reservationById.get(item.reservation_id);
+          const st = CatalogTypeById.get(item.service_type_id);
 
-          const line1 = v ? v.items_summary : `event_type: ${item.event_type}`;
-          const line2 = st ? st.name : `service_type_id: ${item.service_type_id}`;
+          const line1 = v ? v.customer_name : `event_type: ${item.event_type}`;
+          const line2 = st ? st.movie_title : `service_type_id: ${item.service_type_id}`;
 
           const extras: string[] = [];
           if (item.source !== undefined) extras.push(`Costo: ${item.source}`);
           if (item.note) extras.push(`Notas: ${item.note}`);
-          if (item.date) extras.push(`Fecha: ${item.date}`);
+          if (item.created_at) extras.push(`Fecha: ${item.date}`);
 
           return (
             <View style={styles.row}>
